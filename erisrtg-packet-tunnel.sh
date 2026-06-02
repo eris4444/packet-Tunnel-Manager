@@ -3,8 +3,8 @@
 # ERISRTG PACKET TUNNEL
 # Version: 7.0
 # Raw packet-level tunneling for bypassing network restrictions
-# GitHub: https://github.com/ERISRTG/packet-tunnel
-# Manager GitHub: https://github.com/ERISRTG/packet-tunnel
+# GitHub: https://github.com/eris4444/packet-tunnel
+# Manager GitHub: https://github.com/eris4444/packet-tunnel
 #=================================================
 
 # ================================================
