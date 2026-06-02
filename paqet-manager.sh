@@ -1,16 +1,14 @@
 #!/bin/bash
 #=================================================
-# ERISRTG PACKET TUNNEL
+# packet Tunnel Manager
 # Version: 7.0
 # Raw packet-level tunneling for bypassing network restrictions
-# GitHub: https://github.com/eris4444/packet-tunnel
-# Manager GitHub: https://github.com/eris4444/packet-tunnel
+# GitHub: https://github.com/hanselime/packet
+# Manager GitHub: https://github.com/eris4444/packet-Tunnel-Manager
 #=================================================
-
 # ================================================
 # CONFIGURATION DEFAULTS (Easily modifiable)
 # ================================================
-
 # Colors
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
@@ -25,26 +23,26 @@ readonly NC='\033[0m'
 
 # Script Configuration
 readonly SCRIPT_VERSION="7.0"
-readonly MANAGER_NAME="erisrtg-manager"
+readonly MANAGER_NAME="packet-manager"
 readonly MANAGER_PATH="/usr/local/bin/$MANAGER_NAME"
 
 # Paths
-readonly CONFIG_DIR="/etc/erisrtg"
+readonly CONFIG_DIR="/etc/packet"
 readonly SERVICE_DIR="/etc/systemd/system"
 readonly BIN_DIR="/usr/local/bin"
-readonly INSTALL_DIR="/opt/erisrtg"
-readonly BACKUP_DIR="/root/erisrtg-backups"
+readonly INSTALL_DIR="/opt/packet"
+readonly BACKUP_DIR="/root/packet-backups"
 
 # Repositories
-readonly GITHUB_REPO="ERISRTG/packet-tunnel"
-readonly MANAGER_GITHUB_REPO="ERISRTG/packet-tunnel"
-readonly SERVICE_NAME="erisrtg"
+readonly GITHUB_REPO="hanselime/packet"
+readonly MANAGER_GITHUB_REPO="eris4444/packet-Tunnel-Manager"
+readonly SERVICE_NAME="packet"
 
 # Kernel optimization settings
-readonly SYSCTL_FILE="/etc/sysctl.d/99-erisrtg-tunnel.conf"
-readonly LIMITS_FILE="/etc/security/limits.d/99-erisrtg.conf"
-readonly BACKUP_SYSCTL="${BACKUP_DIR}/sysctl-99-erisrtg.backup-$(date +%Y%m%d-%H%M%S)"
-readonly BACKUP_LIMITS="${BACKUP_DIR}/limits-99-erisrtg.backup-$(date +%Y%m%d-%H%M%S)"
+readonly SYSCTL_FILE="/etc/sysctl.d/99-packet-tunnel.conf"
+readonly LIMITS_FILE="/etc/security/limits.d/99-packet.conf"
+readonly BACKUP_SYSCTL="${BACKUP_DIR}/sysctl-99-packet.backup-$(date +%Y%m%d-%H%M%S)"
+readonly BACKUP_LIMITS="${BACKUP_DIR}/limits-99-packet.backup-$(date +%Y%m%d-%H%M%S)"
 
 # Default Values
 readonly DEFAULT_LISTEN_PORT="8888"
@@ -132,10 +130,10 @@ readonly COMMON_PORTS=("443" "80" "22" "53")
 
 # Manager versions for switch option
 declare -A MANAGER_VERSIONS=(
-    ["latest"]="https://raw.githubusercontent.com/ERISRTG/packet-tunnel/main/erisrtg-manager.sh"
-    ["6.0"]="https://raw.githubusercontent.com/ERISRTG/packet-tunnel/main/erisrtg-manager6-0.sh"
-    ["5.1"]="https://raw.githubusercontent.com/ERISRTG/packet-tunnel/main/erisrtg-manager5-1.sh"
-    ["3.8"]="https://raw.githubusercontent.com/ERISRTG/packet-tunnel/main/erisrtg-manager3-8.sh"
+    ["latest"]="https://raw.githubusercontent.com/eris4444/packet-Tunnel-Manager/refs/heads/main/paqet-manager.sh"
+    ["6.0"]="https://raw.githubusercontent.com/eris4444/packet-Tunnel-Manager/main/packet-manager6-0.sh"
+    ["5.1"]="https://raw.githubusercontent.com/eris4444/packet-Tunnel-Manager/main/packet-manager5-1.sh"
+    ["3.8"]="https://raw.githubusercontent.com/eris4444/packet-Tunnel-Manager/main/packet-manager3-8.sh"
 )
 
 # ================================================
@@ -160,29 +158,23 @@ pause() {
 # Clear screen and show banner
 show_banner() {
     clear
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${NC}                                                                  ${CYAN}║${NC}"
-    echo -e "${CYAN}║${NC}  ${BLUE}███████╗██████╗ ██╗███████╗██████╗ ████████╗ ██████╗ ${CYAN}          ║${NC}"
-    echo -e "${CYAN}║${NC}  ${BLUE}██╔════╝██╔══██╗██║██╔════╝██╔══██╗╚══██╔══╝██╔════╝${CYAN}          ║${NC}"
-    echo -e "${CYAN}║${NC}  ${BLUE}█████╗  ██████╔╝██║███████╗██████╔╝   ██║   ██║  ███╗${CYAN}         ║${NC}"
-    echo -e "${CYAN}║${NC}  ${BLUE}██╔══╝  ██╔══██╗██║╚════██║██╔══██╗   ██║   ██║   ██║${CYAN}         ║${NC}"
-    echo -e "${CYAN}║${NC}  ${BLUE}███████╗██║  ██║██║███████║██║  ██║   ██║   ╚██████╔╝${CYAN}         ║${NC}"
-    echo -e "${CYAN}║${NC}  ${BLUE}╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝${CYAN}          ║${NC}"
-    echo -e "${CYAN}║${NC}                                                                  ${CYAN}║${NC}"
-    echo -e "${CYAN}║${NC}  ${MAGENTA}██████╗  █████╗  ██████╗██╗  ██╗███████╗████████╗${CYAN}              ║${NC}"
-    echo -e "${CYAN}║${NC}  ${MAGENTA}██╔══██╗██╔══██╗██╔════╝██║ ██╔╝██╔════╝╚══██╔══╝${CYAN}              ║${NC}"
-    echo -e "${CYAN}║${NC}  ${MAGENTA}██████╔╝███████║██║     █████╔╝ █████╗     ██║   ${CYAN}               ║${NC}"
-    echo -e "${CYAN}║${NC}  ${MAGENTA}██╔═══╝ ██╔══██║██║     ██╔═██╗ ██╔══╝     ██║   ${CYAN}               ║${NC}"
-    echo -e "${CYAN}║${NC}  ${MAGENTA}██║     ██║  ██║╚██████╗██║  ██╗███████╗   ██║   ${CYAN}               ║${NC}"
-    echo -e "${CYAN}║${NC}  ${MAGENTA}╚═╝     ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ${CYAN}              ║${NC}"
-    echo -e "${CYAN}║${NC}                                                                  ${CYAN}║${NC}"
-    echo -e "${CYAN}║${NC}  ${WHITE}▸ Raw Packet Tunneling  ▸ Firewall Bypass  ▸ KCP/UDP  ${CYAN}         ║${NC}"
-    echo -e "${CYAN}║${NC}  ${YELLOW}              ────────── Manager v${SCRIPT_VERSION} ──────────${CYAN}              ║${NC}"
-    echo -e "${CYAN}║${NC}                                                                  ${CYAN}║${NC}"
-    echo -e "${CYAN}║${NC}  ${GREEN}  ✦ https://t.me/ERISRTG${CYAN}                                       ║${NC}"
-    echo -e "${CYAN}║${NC}  ${GREEN}  ✦ https://github.com/ERISRTG${CYAN}                                 ║${NC}"
-    echo -e "${CYAN}║${NC}                                                                  ${CYAN}║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${MAGENTA}"
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║                                                              ║"
+    echo "║     ███████╗██████╗ ██╗███████╗██████╗ ████████╗ ██████╗    ║"
+    echo "║     ██╔════╝██╔══██╗██║██╔════╝██╔══██╗╚══██╔══╝██╔════╝    ║"
+    echo "║     █████╗  ██████╔╝██║███████╗██████╔╝   ██║   ██║  ███╗   ║"
+    echo "║     ██╔══╝  ██╔══██╗██║╚════██║██╔══██╗   ██║   ██║   ██║   ║"
+    echo "║     ███████╗██║  ██║██║███████║██║  ██║   ██║   ╚██████╔╝   ║"
+    echo "║     ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝    ║"
+    echo "║                                                              ║"
+    echo "║          Raw Packet Tunnel - Firewall Bypass                 ║"
+    echo "║                                 Manager v${SCRIPT_VERSION}                 ║"
+    echo "║                                                              ║"
+    echo "║          https://github.com/eris4444                         ║"
+    echo "║          https://github.com/eris4444/packet-tunnel-manager   ║"    
+    echo "║                                                              ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
 }
 
@@ -363,7 +355,7 @@ normalize_port() {
 }
 
 # ────────────────────────────────────────────────────────────────
-# Check for dangerous forward rules that point back to ERISRTG listener
+# Check for dangerous forward rules that point back to packet listener
 # Prevents traffic loop / infinite bandwidth consumption
 # ────────────────────────────────────────────────────────────────
 validate_forward_rules() {
@@ -392,7 +384,7 @@ validate_forward_rules() {
         if [ "$p" = "$srv_port" ]; then
             print_error "⚠️ TRAFFIC LOOP DETECTED!"
             echo -e "   • Local port: ${YELLOW}$p${NC}"
-            echo -e "   • ERISRTG server port: ${YELLOW}$server_ip:$server_port${NC}"
+            echo -e "   • packet server port: ${YELLOW}$server_ip:$server_port${NC}"
             echo -e "   This will create an infinite traffic loop and consume all bandwidth!"
             ((dangerous++))
         fi
@@ -422,8 +414,8 @@ generate_secret_key() {
     fi
 }
 
-# Get latest ERISRTG version from GitHub
-get_latest_erisrtg_version() {
+# Get latest packet version from GitHub
+get_latest_packet_version() {
     local version
     version=$(curl -s "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" | grep -o '"tag_name": "[^"]*"' | cut -d'"' -f4 2>/dev/null)    
     if [ -n "$version" ]; then
@@ -501,17 +493,17 @@ configure_iptables() {
 # Create systemd service
 create_systemd_service() {
     local config_name="$1"
-    local service_name="erisrtg-${config_name}"
+    local service_name="packet-${config_name}"
     
     cat > "$SERVICE_DIR/${service_name}.service" << EOF
 [Unit]
-Description=ERISRTG Packet Tunnel (${config_name})
+Description=packet Tunnel (${config_name})
 After=network.target
 StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-ExecStart=$BIN_DIR/erisrtg run -c $CONFIG_DIR/${config_name}.yaml
+ExecStart=$BIN_DIR/packet run -c $CONFIG_DIR/${config_name}.yaml
 Restart=always
 RestartSec=5
 LimitNOFILE=65535
@@ -633,7 +625,7 @@ manage_cronjob() {
 # Get service details
 get_service_details() {
     local service_name="$1"
-    local config_name="${service_name#erisrtg-}"
+    local config_name="${service_name#packet-}"
     local config_file="$CONFIG_DIR/$config_name.yaml"
     
     local type="unknown"
@@ -798,15 +790,15 @@ manage_services() {
         show_banner
         
         echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════════════════════════════════════════════════╗${NC}"
-        echo -e "${GREEN}║ ERISRTG Services - Manage                                                                                   ║${NC}"
+        echo -e "${GREEN}║ packet Services - Manage                                                                                   ║${NC}"
         echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════╝${NC}\n"
         
         local services=()
         mapfile -t services < <(systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null |
-                              grep -E '^erisrtg-.*\.service' | awk '{print $1}' || true)
+                              grep -E '^packet-.*\.service' | awk '{print $1}' || true)
         
         if [[ ${#services[@]} -eq 0 ]]; then
-            echo -e "${YELLOW}No ERISRTG services found.${NC}\n"
+            echo -e "${YELLOW}No packet services found.${NC}\n"
             pause
             return
         fi
@@ -818,7 +810,7 @@ manage_services() {
         local i=1
         for svc in "${services[@]}"; do
             local service_name="${svc%.service}"
-            local display_name="${service_name#erisrtg-}"
+            local display_name="${service_name#packet-}"
             local status
             status=$(systemctl is-active "$svc" 2>/dev/null || echo "unknown")
             local details
@@ -870,7 +862,7 @@ manage_services() {
         
         local selected_service="${services[$((choice-1))]}"
         local service_name="${selected_service%.service}"
-        local display_name="${service_name#erisrtg-}"
+        local display_name="${service_name#packet-}"
         manage_single_service "$selected_service" "$display_name"
     done
 }
@@ -1337,8 +1329,8 @@ configure_server() {
         echo -e "\n${CYAN}Applying Configuration${NC}"
         echo -e "────────────────────────────────────────────────────────────────"
         
-        if [ ! -f "$BIN_DIR/erisrtg" ]; then
-            install_erisrtg || continue
+        if [ ! -f "$BIN_DIR/packet" ]; then
+            install_packet || continue
         fi
         
         configure_iptables "$port" "tcp"
@@ -1346,7 +1338,7 @@ configure_server() {
         
         # Build server config with proper indentation
         {
-            echo "# ERISRTG Server Configuration"
+            echo "# packet Server Configuration"
             echo "role: \"server\""
             echo "log:"
             echo "  level: \"info\""
@@ -1397,7 +1389,7 @@ configure_server() {
         echo -e "[+] Configuration saved : ${CYAN}$CONFIG_DIR/${config_name}.yaml${NC}"
         
         create_systemd_service "$config_name"
-        local svc="erisrtg-${config_name}"
+        local svc="packet-${config_name}"
         systemctl enable "$svc" --now >/dev/null 2>&1
         
         if systemctl is-active --quiet "$svc"; then
@@ -1785,7 +1777,7 @@ configure_client() {
                 echo -e "  • Server endpoint: $server_ip:$server_port"
                 echo -e "  • Forward ports: $forward_ports"
                 echo -e "${YELLOW}Make sure none of the forward ports match the server port.${NC}"
-                echo -e "${YELLOW}Forward ports should point to your actual services (V2Ray, web servers, etc.), not the ERISRTG tunnel.${NC}"
+                echo -e "${YELLOW}Forward ports should point to your actual services (V2Ray, web servers, etc.), not the packet tunnel.${NC}"
                 pause
                 continue
             fi
@@ -1795,15 +1787,15 @@ configure_client() {
         echo -e "\n${CYAN}Applying Configuration${NC}"
         echo -e "────────────────────────────────────────────────────────────────"
         
-        if [ ! -f "$BIN_DIR/erisrtg" ]; then
-            install_erisrtg || continue
+        if [ ! -f "$BIN_DIR/packet" ]; then
+            install_packet || continue
         fi
         
         mkdir -p "$CONFIG_DIR"
         
         # Build client config with proper indentation
         {
-            echo "# ERISRTG Client Configuration"
+            echo "# packet Client Configuration"
             echo "role: \"client\""
             echo "log:"
             echo "  level: \"info\""
@@ -1867,7 +1859,7 @@ configure_client() {
         echo -e "[+] Configuration saved : ${CYAN}$CONFIG_DIR/${config_name}.yaml${NC}"
         
         create_systemd_service "$config_name"
-        local svc="erisrtg-${config_name}"
+        local svc="packet-${config_name}"
         systemctl enable "$svc" --now >/dev/null 2>&1
         
         if systemctl is-active --quiet "$svc"; then
@@ -2080,13 +2072,13 @@ extract_ping_stats() {
     fi
 }
 
-# Test ERISRTG tunnel
-test_erisrtg_tunnel() {
+# Test packet tunnel
+test_packet_tunnel() {
     clear
-    echo -e "\n${YELLOW}Test ERISRTG Packet Tunnel Connection${NC}"
+    echo -e "\n${YELLOW}Test packet Tunnel Connection${NC}"
     echo -e "────────────────────────────────────────────────────────────────"
     
-    echo -e "${CYAN}This test will check if you can establish a ERISRTG tunnel between two servers.${NC}\n"
+    echo -e "${CYAN}This test will check if you can establish a packet tunnel between two servers.${NC}\n"
     
     echo -en "${YELLOW}Remote Server IP Address: ${NC}"
     read -r remote_ip
@@ -2094,7 +2086,7 @@ test_erisrtg_tunnel() {
     [ -z "$remote_ip" ] && { print_error "IP address required"; return; }
     validate_ip "$remote_ip" || { print_error "Invalid IP address format"; return; }
     
-    echo -e "\n${YELLOW}Starting comprehensive ERISRTG tunnel test to $remote_ip...${NC}\n"
+    echo -e "\n${YELLOW}Starting comprehensive packet tunnel test to $remote_ip...${NC}\n"
     
     # 1. Basic connectivity
     print_step "1. Testing basic ICMP connectivity..."
@@ -2119,23 +2111,23 @@ test_erisrtg_tunnel() {
     
     # 2. Test common ports
     echo -e "\n${YELLOW}2. Testing common ports...${NC}"
-    local erisrtg_ports_found=0
+    local packet_ports_found=0
     
     for port in "${COMMON_PORTS[@]}"; do
         echo -n " Port $port: "
         if timeout 3 bash -c "</dev/tcp/$remote_ip/$port" 2>/dev/null; then
             echo -e "${GREEN}OPEN${NC}"
-            ((erisrtg_ports_found++))
+            ((packet_ports_found++))
         else
             echo -e "${CYAN}Closed/Filtered${NC}"
         fi
         sleep 0.1
     done
     
-    if [ $erisrtg_ports_found -eq 0 ]; then
+    if [ $packet_ports_found -eq 0 ]; then
         print_warning "⚠️ No common ports found open"
     else
-        print_success "✅ Found $erisrtg_ports_found open port(s)"
+        print_success "✅ Found $packet_ports_found open port(s)"
     fi
     
     # 3. MTU testing
@@ -2252,12 +2244,12 @@ test_connection() {
     clear
     show_banner
     echo -e "${GREEN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║ Test ERISRTG Connection                                         ║${NC}"
+    echo -e "${GREEN}║ Test packet Connection                                         ║${NC}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════════════╝${NC}\n"
     
     echo -e "${CYAN}Connection Test Options:${NC}"
     echo -e "────────────────────────────────────────────────────────────────"
-    echo " 1. Test ERISRTG tunnel connection (server to server)"
+    echo " 1. Test packet tunnel connection (server to server)"
     echo " 2. Test internet connectivity"
     echo " 3. Test DNS resolution"
     echo " 0. Back to Main Menu"
@@ -2268,7 +2260,7 @@ test_connection() {
         
         case $test_choice in
             1)
-                test_erisrtg_tunnel
+                test_packet_tunnel
                 pause
                 return
                 ;;
@@ -2301,32 +2293,61 @@ check_dependencies() {
     local missing_deps=()
     local os
     os=$(detect_os)
-    
-    local common_deps=("curl" "wget" "iptables" "lsof")
-    
+
+    local -a common_deps=("curl" "wget" "iptables" "lsof")
+
     case $os in
         ubuntu|debian)
-            common_deps+=("libpcap-dev" "iproute2" "cron" "dig")
+            common_deps+=("libpcap-dev" "iproute2" "cron")
             ;;
         centos|rhel|fedora|rocky|almalinux)
             common_deps+=("libpcap-devel" "iproute" "cronie" "bind-utils")
             ;;
     esac
-    
+
     for dep in "${common_deps[@]}"; do
-        if ! command -v "$dep" &>/dev/null && 
-           ! dpkg -l | grep -q "$dep" 2>/dev/null && 
-           ! rpm -q "$dep" &>/dev/null 2>&1; then
-            missing_deps+=("$dep")
+        if command -v "$dep" &>/dev/null; then
+            continue
         fi
+        case $os in
+            ubuntu|debian)
+                if dpkg-query -W -f='${Status}' "$dep" 2>/dev/null | grep -q "install ok installed"; then
+                    continue
+                fi
+                ;;
+            centos|rhel|fedora|rocky|almalinux)
+                if rpm -q "$dep" &>/dev/null; then
+                    continue
+                fi
+                ;;
+        esac
+        missing_deps+=("$dep")
     done
-    
+
+    # DNS tools: dig is provided by dnsutils (Debian) or bind-utils (RHEL)
+    if ! command -v dig &>/dev/null; then
+        case $os in
+            ubuntu|debian)
+                if ! dpkg-query -W -f='${Status}' dnsutils 2>/dev/null | grep -q "install ok installed"; then
+                    missing_deps+=("dnsutils")
+                fi
+                ;;
+            centos|rhel|fedora|rocky|almalinux)
+                if ! rpm -q bind-utils &>/dev/null; then
+                    missing_deps+=("bind-utils")
+                fi
+                ;;
+            *)
+                missing_deps+=("dig")
+                ;;
+        esac
+    fi
+
     if [ ${#missing_deps[@]} -eq 0 ]; then
         return 0
-    else
-        echo "${missing_deps[@]}"
-        return 1
     fi
+    echo "${missing_deps[@]}"
+    return 1
 }
 
 # Install dependencies
@@ -2432,11 +2453,11 @@ install_iptables_persistent() {
     save_iptables
 }
 
-# Install ERISRTG binary
-install_erisrtg() {
+# Install packet binary
+install_packet() {
     clear
     show_banner
-    print_step "ERISRTG Core Installation\n"
+    print_step "packet Core Installation\n"
     
     local os
     os=$(detect_os)
@@ -2445,21 +2466,21 @@ install_erisrtg() {
     
     # Get current version if installed
     local current_version="Not installed"
-    if [ -f "$BIN_DIR/erisrtg" ]; then
-        current_version=$("$BIN_DIR/erisrtg" version 2>/dev/null | grep "^Version:" | head -1 | cut -d':' -f2 | xargs)
+    if [ -f "$BIN_DIR/packet" ]; then
+        current_version=$("$BIN_DIR/packet" version 2>/dev/null | grep "^Version:" | head -1 | cut -d':' -f2 | xargs)
         [ -z "$current_version" ] && current_version="unknown"
     fi
     
     # Get latest version from GitHub
     local latest_version
-    latest_version=$(get_latest_erisrtg_version)
+    latest_version=$(get_latest_packet_version)
     
     echo -e "${YELLOW}System Information:${NC}"
     echo -e " OS: ${CYAN}$os${NC}"
     echo -e " Arch: ${CYAN}$arch${NC}"
     echo -e " Current Version: ${CYAN}$current_version${NC}"
     echo -e " Latest Version: ${CYAN}$latest_version${NC}\n"
-    mkdir -p "/root/erisrtg"
+    mkdir -p "/root/packet"
     local arch_name=""
     case $arch in
         amd64) arch_name="amd64" ;;
@@ -2469,23 +2490,23 @@ install_erisrtg() {
         *) arch_name="$arch" ;;
     esac
     
-    local expected_file="erisrtg-linux-${arch_name}-${latest_version}.tar.gz"
+    local expected_file="packet-linux-${arch_name}-${latest_version}.tar.gz"
     local download_url="https://github.com/${GITHUB_REPO}/releases/download/${latest_version}/${expected_file}"
     
     echo -e "${YELLOW}Download URL:${NC} ${CYAN}$download_url${NC}\n"
     
     echo -e "${GREEN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN} erisrtg core${NC}"
+    echo -e "${GREEN} packet core${NC}"
     echo -e "${GREEN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${YELLOW}Installation Options erisrtg core:${NC}"
+    echo -e "${YELLOW}Installation Options packet core:${NC}"
     echo -e " 1) ${GREEN}Download/Update from GitHub (latest: $latest_version)${NC}"
-    echo -e " 2) ${CYAN}Use local file from /root/erisrtg/${NC}"
+    echo -e " 2) ${CYAN}Use local file from /root/packet/${NC}"
     echo -e " 3) ${PURPLE}Download from custom URL${NC}"
     echo -e ""
     echo -e "${GREEN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN} erisrtg manager${NC}"
+    echo -e "${GREEN} packet manager${NC}"
     echo -e "${GREEN}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${YELLOW}Installation Options erisrtg manager:${NC}"
+    echo -e "${YELLOW}Installation Options packet manager:${NC}"
     echo -e " 4) ${BLUE}Install script${NC}"
     echo -e " 5) ${BLUE}Update script${NC}"
     echo -e " 6) ${BLUE}Switch version${NC}"
@@ -2499,7 +2520,7 @@ install_erisrtg() {
         1)
             print_info "Downloading latest version ($latest_version) from GitHub for $os/$arch_name..."
             
-            if ! curl -fsSL "$download_url" -o "/tmp/erisrtg.tar.gz" 2>/dev/null; then
+            if ! curl -fsSL "$download_url" -o "/tmp/packet.tar.gz" 2>/dev/null; then
                 print_error "Download failed from GitHub"
                 echo -e "\n${YELLOW}Please check:${NC}"
                 echo -e " 1. Internet connection"
@@ -2508,35 +2529,35 @@ install_erisrtg() {
                 echo -e "\n${YELLOW}You can also:${NC}"
                 echo -e " - Try again later"
                 echo -e " - Download manually from: $download_url"
-                echo -e " - Save to: /root/erisrtg/$expected_file"
+                echo -e " - Save to: /root/packet/$expected_file"
                 echo -e " - Then use option 2 to install from local file"
                 pause
                 return 1
             else
                 print_success "Downloaded version ${latest_version}"
-                cp "/tmp/erisrtg.tar.gz" "/root/erisrtg/$expected_file" 2>/dev/null && \
-                print_info "Saved copy to /root/erisrtg/$expected_file for future use"
+                cp "/tmp/packet.tar.gz" "/root/packet/$expected_file" 2>/dev/null && \
+                print_info "Saved copy to /root/packet/$expected_file for future use"
             fi
             ;;
         2)
             local local_files=()
-            if [ -d "/root/erisrtg" ]; then
+            if [ -d "/root/packet" ]; then
                 while IFS= read -r file; do
-                    if [[ "$file" =~ erisrtg-linux-.*\.tar\.gz$ ]]; then
+                    if [[ "$file" =~ packet-linux-.*\.tar\.gz$ ]]; then
                         local_files+=("$file")
                     fi
-                done < <(find "/root/erisrtg" -name "*.tar.gz" -type f 2>/dev/null | sort)
+                done < <(find "/root/packet" -name "*.tar.gz" -type f 2>/dev/null | sort)
             fi
             
             if [ ${#local_files[@]} -eq 0 ]; then
-                print_error "No valid erisrtg archives found in /root/erisrtg"
-                echo -e "\n${YELLOW}Expected filename format:${NC} erisrtg-linux-{arch}-{version}.tar.gz"
-                echo -e "${YELLOW}Example:${NC} erisrtg-linux-amd64-v1.0.0-alpha.16.tar.gz"
+                print_error "No valid packet archives found in /root/packet"
+                echo -e "\n${YELLOW}Expected filename format:${NC} packet-linux-{arch}-{version}.tar.gz"
+                echo -e "${YELLOW}Example:${NC} packet-linux-amd64-v1.0.0-alpha.16.tar.gz"
                 pause
                 return 1
             fi
             
-            echo -e "\n${YELLOW}Found local erisrtg archives:${NC}\n"
+            echo -e "\n${YELLOW}Found local packet archives:${NC}\n"
             
             for i in "${!local_files[@]}"; do
                 local filename
@@ -2573,7 +2594,7 @@ install_erisrtg() {
                 fi
                 
                 print_success "Using: $selected_filename"
-                cp "$selected_file" "/tmp/erisrtg.tar.gz"
+                cp "$selected_file" "/tmp/packet.tar.gz"
             else
                 print_error "Invalid selection"
                 pause
@@ -2592,7 +2613,7 @@ install_erisrtg() {
             fi
             
             print_info "Downloading from custom URL..."
-            if ! curl -fsSL "$custom_url" -o "/tmp/erisrtg.tar.gz" 2>/dev/null; then
+            if ! curl -fsSL "$custom_url" -o "/tmp/packet.tar.gz" 2>/dev/null; then
                 print_error "Download failed"
                 echo -e "\n${YELLOW}Please check:${NC}"
                 echo -e " 1. URL is correct"
@@ -2632,24 +2653,24 @@ install_erisrtg() {
     mkdir -p "$INSTALL_DIR"
     print_step "Extracting archive..."
     rm -rf "$INSTALL_DIR"/*    
-    tar -xzf "/tmp/erisrtg.tar.gz" -C "$INSTALL_DIR" 2>/dev/null || {
+    tar -xzf "/tmp/packet.tar.gz" -C "$INSTALL_DIR" 2>/dev/null || {
         print_error "Failed to extract archive"
         echo -e "\n${YELLOW}Possible issues:${NC}"
         echo -e " 1. Corrupted download"
         echo -e " 2. Wrong file format"
         echo -e " 3. Incompatible archive"
-        rm -f "/tmp/erisrtg.tar.gz"
+        rm -f "/tmp/packet.tar.gz"
         pause
         return 1
     }
     
     print_success "Archive extracted to $INSTALL_DIR"
     local binary_file=""
-    local standard_binary="$INSTALL_DIR/erisrtg_linux_${arch_name}"
+    local standard_binary="$INSTALL_DIR/packet_linux_${arch_name}"
     if [ -f "$standard_binary" ]; then
         binary_file="$standard_binary"
     else
-        binary_file=$(find "$INSTALL_DIR" -type f -name "*erisrtg*" -exec file {} \; | grep -i "executable" | cut -d: -f1 | head -1)
+        binary_file=$(find "$INSTALL_DIR" -type f -name "*packet*" -exec file {} \; | grep -i "executable" | cut -d: -f1 | head -1)
     fi
 
     if [ -z "$binary_file" ] || [ ! -f "$binary_file" ]; then
@@ -2663,14 +2684,14 @@ install_erisrtg() {
     
     if [ -n "$binary_file" ] && [ -f "$binary_file" ]; then
         print_info "Found binary: $(basename "$binary_file")"
-        rm -f "$BIN_DIR/erisrtg"
-        cp "$binary_file" "$BIN_DIR/erisrtg"
-        chmod +x "$BIN_DIR/erisrtg"
+        rm -f "$BIN_DIR/packet"
+        cp "$binary_file" "$BIN_DIR/packet"
+        chmod +x "$BIN_DIR/packet"
         
-        print_success "ERISRTG installed to $BIN_DIR/erisrtg"
+        print_success "packet installed to $BIN_DIR/packet"
         
         local new_version
-        new_version=$("$BIN_DIR/erisrtg" version 2>/dev/null | grep "^Version:" | head -1 | cut -d':' -f2 | xargs)
+        new_version=$("$BIN_DIR/packet" version 2>/dev/null | grep "^Version:" | head -1 | cut -d':' -f2 | xargs)
         if [ -n "$new_version" ]; then
             print_info "Installed version: ${CYAN}$new_version${NC}"
             
@@ -2689,8 +2710,8 @@ install_erisrtg() {
             print_info "Trying to make file executable: $any_file"
             chmod +x "$any_file"
             if [ -x "$any_file" ] && file "$any_file" | grep -q "executable"; then
-                cp "$any_file" "$BIN_DIR/erisrtg"
-                print_success "ERISRTG installed using alternative method"
+                cp "$any_file" "$BIN_DIR/packet"
+                print_success "packet installed using alternative method"
             fi
         else
             pause
@@ -2699,9 +2720,9 @@ install_erisrtg() {
     fi
     
     # پاک کردن فایل موقت
-    rm -f "/tmp/erisrtg.tar.gz"
+    rm -f "/tmp/packet.tar.gz"
     
-    print_success "ERISRTG core installation completed!"
+    print_success "packet core installation completed!"
     pause
     return 0
 }
@@ -2710,17 +2731,17 @@ install_erisrtg() {
 install_manager_script() {
     clear
     show_banner
-    print_step "Installing ERISRTG Manager script...\n"
+    print_step "Installing packet Manager script...\n"
     
-    local manager_url="https://raw.githubusercontent.com/${MANAGER_GITHUB_REPO}/main/erisrtg-manager.sh"
+    local manager_url="https://raw.githubusercontent.com/${MANAGER_GITHUB_REPO}/main/packet-manager.sh"
     
     print_info "Downloading from: $manager_url"
     
     if curl -fsSL "$manager_url" -o "$MANAGER_PATH" 2>/dev/null; then
         chmod +x "$MANAGER_PATH"
-        print_success "✅ ERISRTG Manager installed to $MANAGER_PATH"
+        print_success "✅ packet Manager installed to $MANAGER_PATH"
         echo -e "\n${GREEN}You can now run the manager using command:${NC}"
-        echo -e " ${CYAN}erisrtg-manager${NC}"
+        echo -e " ${CYAN}packet-manager${NC}"
         echo -e "\n${YELLOW}Note: You may need to log out and back in for the command to be available.${NC}"
     else
         print_error "Failed to download manager script"
@@ -2736,7 +2757,7 @@ install_manager_script() {
 update_manager_script() {
     clear
     show_banner
-    print_step "Updating ERISRTG Manager script...\n"
+    print_step "Updating packet Manager script...\n"
     
     if [ ! -f "$MANAGER_PATH" ]; then
         print_warning "Manager script not found at $MANAGER_PATH"
@@ -2748,17 +2769,17 @@ update_manager_script() {
     fi
     
     mkdir -p "$BACKUP_DIR"
-    local backup_path="${BACKUP_DIR}/erisrtg-manager.backup-$(date +%Y%m%d-%H%M%S)"
+    local backup_path="${BACKUP_DIR}/packet-manager.backup-$(date +%Y%m%d-%H%M%S)"
     cp "$MANAGER_PATH" "$backup_path"
     print_info "Backup created at $backup_path"
     
-    local manager_url="https://raw.githubusercontent.com/${MANAGER_GITHUB_REPO}/main/erisrtg-manager.sh"
+    local manager_url="https://raw.githubusercontent.com/${MANAGER_GITHUB_REPO}/main/packet-manager.sh"
     
     print_info "Downloading latest version..."
     
     if curl -fsSL "$manager_url" -o "$MANAGER_PATH" 2>/dev/null; then
         chmod +x "$MANAGER_PATH"
-        print_success "✅ ERISRTG Manager updated successfully!"
+        print_success "✅ packet Manager updated successfully!"
         echo -e "\n${GREEN}Manager updated to latest version${NC}"
         echo -e "${YELLOW}Backup saved at:${NC} $backup_path"
         
@@ -2780,7 +2801,7 @@ update_manager_script() {
 switch_manager_version() {
     clear
     show_banner
-    print_step "Switch ERISRTG Manager Version\n"
+    print_step "Switch packet Manager Version\n"
     
     echo -e "${YELLOW}Available versions:${NC}"
     echo -e "────────────────────────────────────────────────────────────────"
@@ -2825,7 +2846,7 @@ switch_manager_version() {
     
     if [ -f "$MANAGER_PATH" ]; then
         mkdir -p "$BACKUP_DIR"
-        local backup_path="${BACKUP_DIR}/erisrtg-manager.backup-$(date +%Y%m%d-%H%M%S)"
+        local backup_path="${BACKUP_DIR}/packet-manager.backup-$(date +%Y%m%d-%H%M%S)"
         cp "$MANAGER_PATH" "$backup_path"
         print_info "Backup created at $backup_path"
     fi
@@ -2849,7 +2870,7 @@ switch_manager_version() {
 uninstall_manager_script() {
     clear
     show_banner
-    print_step "Uninstall ERISRTG Manager\n"
+    print_step "Uninstall packet Manager\n"
     
     if [ ! -f "$MANAGER_PATH" ]; then
         print_info "Manager script not found at $MANAGER_PATH"
@@ -2857,7 +2878,7 @@ uninstall_manager_script() {
         return 0
     fi
     
-    echo -e "${RED}WARNING: This will remove the ERISRTG Manager command.${NC}"
+    echo -e "${RED}WARNING: This will remove the packet Manager command.${NC}"
     echo -e "${YELLOW}The manager script will be deleted from:${NC} $MANAGER_PATH\n"
     
     read -p "Are you sure you want to uninstall? (y/N): " confirm
@@ -2869,14 +2890,14 @@ uninstall_manager_script() {
     fi
     
     mkdir -p "$BACKUP_DIR"
-    local backup_path="${BACKUP_DIR}/erisrtg-manager.backup-$(date +%Y%m%d-%H%M%S)"
+    local backup_path="${BACKUP_DIR}/packet-manager.backup-$(date +%Y%m%d-%H%M%S)"
     cp "$MANAGER_PATH" "$backup_path"
     print_info "Backup created at $backup_path"
     
     rm -f "$MANAGER_PATH"
     
     if [ ! -f "$MANAGER_PATH" ]; then
-        print_success "✅ ERISRTG Manager uninstalled successfully"
+        print_success "✅ packet Manager uninstalled successfully"
         echo -e "\n${YELLOW}Backup saved at:${NC} $backup_path"
         echo -e "${YELLOW}To restore, run:${NC} cp $backup_path $MANAGER_PATH"
     else
@@ -2918,7 +2939,7 @@ apply_kernel_optimizations() {
     
     # Create sysctl config
     cat > "$SYSCTL_FILE" << 'EOF'
-# ERISRTG Packet Tunnel - Kernel Optimizations
+# packet Tunnel - Kernel Optimizations
 # Network core settings
 net.core.rmem_max = 268435456
 net.core.wmem_max = 268435456
@@ -2985,7 +3006,7 @@ EOF
     # Create limits.conf
     print_step "Creating system limits configuration..."
     cat > "$LIMITS_FILE" << 'EOF'
-# ERISRTG Packet Tunnel - System Limits
+# packet Tunnel - System Limits
 *               soft    nofile          1048576
 *               hard    nofile          1048576
 root            soft    nofile          1048576
@@ -3028,7 +3049,7 @@ remove_kernel_optimizations() {
     echo -e "${RED}║ Remove Kernel Optimizations                               ║${NC}"
     echo -e "${RED}╚══════════════════════════════════════════════════════════╝${NC}\n"
     
-    print_warning "This will remove all ERISRTG kernel optimizations and restore system defaults."
+    print_warning "This will remove all packet kernel optimizations and restore system defaults."
     echo ""
     
     read -p "Are you sure? (y/N): " confirm
@@ -3306,25 +3327,25 @@ manage_all_services() {
         clear
         show_banner
         echo -e "${GREEN}╔══════════════════════════════════════════════════════════════╗${NC}"
-        echo -e "${GREEN}║                 Manage All ERISRTG Services                    ║${NC}"
+        echo -e "${GREEN}║                 Manage All packet Services                    ║${NC}"
         echo -e "${GREEN}╚══════════════════════════════════════════════════════════════╝${NC}\n"
         
         local services=()
         mapfile -t services < <(systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null |
-                              grep -E '^erisrtg-.*\.service' | awk '{print $1}' || true)
+                              grep -E '^packet-.*\.service' | awk '{print $1}' || true)
         
         if [[ ${#services[@]} -eq 0 ]]; then
-            echo -e "${YELLOW}No ERISRTG services found.${NC}\n"
+            echo -e "${YELLOW}No packet services found.${NC}\n"
             pause
             return
         fi
         
-        echo -e "${CYAN}Found ${#services[@]} ERISRTG service(s):${NC}\n"
+        echo -e "${CYAN}Found ${#services[@]} packet service(s):${NC}\n"
         
         local i=1
         for svc in "${services[@]}"; do
             local service_name="${svc%.service}"
-            local display_name="${service_name#erisrtg-}"
+            local display_name="${service_name#packet-}"
             local status
             status=$(systemctl is-active "$svc" 2>/dev/null || echo "unknown")
             
@@ -3413,14 +3434,14 @@ manage_all_services() {
 
 start_all_services() {
     local services=("$@")
-    echo -e "\n${YELLOW}Starting all ERISRTG services...${NC}"
+    echo -e "\n${YELLOW}Starting all packet services...${NC}"
     
     local success_count=0
     local fail_count=0
     
     for svc in "${services[@]}"; do
         local service_name="${svc%.service}"
-        local display_name="${service_name#erisrtg-}"
+        local display_name="${service_name#packet-}"
         
         echo -n " Starting $display_name... "
         
@@ -3447,14 +3468,14 @@ start_all_services() {
 
 stop_all_services() {
     local services=("$@")
-    echo -e "\n${YELLOW}Stopping all ERISRTG services...${NC}"
+    echo -e "\n${YELLOW}Stopping all packet services...${NC}"
     
     local success_count=0
     local fail_count=0
     
     for svc in "${services[@]}"; do
         local service_name="${svc%.service}"
-        local display_name="${service_name#erisrtg-}"
+        local display_name="${service_name#packet-}"
         
         echo -n " Stopping $display_name... "
         
@@ -3540,7 +3561,7 @@ change_mode_all_services() {
     if [[ "$restart_choice" =~ ^[Yy]$ ]]; then
         local services=()
         mapfile -t services < <(systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null |
-                              grep -E '^erisrtg-.*\.service' | awk '{print $1}' || true)
+                              grep -E '^packet-.*\.service' | awk '{print $1}' || true)
         restart_all_services "${services[@]}"
     fi
     
@@ -3599,7 +3620,7 @@ change_conn_all_services() {
     if [[ "$restart_choice" =~ ^[Yy]$ ]]; then
         local services=()
         mapfile -t services < <(systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null |
-                              grep -E '^erisrtg-.*\.service' | awk '{print $1}' || true)
+                              grep -E '^packet-.*\.service' | awk '{print $1}' || true)
         restart_all_services "${services[@]}"
     fi
     
@@ -3667,7 +3688,7 @@ change_block_all_services() {
     if [[ "$restart_choice" =~ ^[Yy]$ ]]; then
         local services=()
         mapfile -t services < <(systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null |
-                              grep -E '^erisrtg-.*\.service' | awk '{print $1}' || true)
+                              grep -E '^packet-.*\.service' | awk '{print $1}' || true)
         restart_all_services "${services[@]}"
     fi
     
@@ -3683,7 +3704,7 @@ apply_connection_protection() {
     echo -e "${YELLOW}Apply Connection Protection (Anti-RST + NOTRACK)${NC}"
     echo -e "${YELLOW}══════════════════════════════════════════════════════════════${NC}\n"
     
-    print_step "Scanning active ERISRTG configurations..."
+    print_step "Scanning active packet configurations..."
     
     local configs=()
     while IFS= read -r -d '' file; do
@@ -3691,7 +3712,7 @@ apply_connection_protection() {
     done < <(find "$CONFIG_DIR" -name "*.yaml" -type f -print0 2>/dev/null)
     
     if [[ ${#configs[@]} -eq 0 ]]; then
-        print_warning "No ERISRTG configuration files found in $CONFIG_DIR"
+        print_warning "No packet configuration files found in $CONFIG_DIR"
         pause
         return 1
     fi
@@ -3828,11 +3849,11 @@ apply_connection_protection() {
     save_iptables
 
     echo ""
-    read -p "Restart all ERISRTG services now? (y/N): " restart_choice
+    read -p "Restart all packet services now? (y/N): " restart_choice
     if [[ "$restart_choice" =~ ^[Yy]$ ]]; then
         local services=()
         mapfile -t services < <(systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null |
-                              grep -E '^erisrtg-.*\.service' | awk '{print $1}' || true)
+                              grep -E '^packet-.*\.service' | awk '{print $1}' || true)
         
         for svc in "${services[@]}"; do
             systemctl restart "$svc" 2>/dev/null && \
@@ -3840,9 +3861,9 @@ apply_connection_protection() {
         done
         
         if [[ ${#services[@]} -gt 0 ]]; then
-            print_success "All ERISRTG services restarted"
+            print_success "All packet services restarted"
         else
-            print_info "No ERISRTG services found to restart"
+            print_info "No packet services found to restart"
         fi
     fi
     
@@ -3855,7 +3876,7 @@ remove_connection_protection() {
     echo -e "${YELLOW}Remove Connection Protection Rules${NC}"
     echo -e "${YELLOW}══════════════════════════════════════════════════════════════${NC}\n"
     
-    print_warning "This will remove all ERISRTG-related iptables protection rules."
+    print_warning "This will remove all packet-related iptables protection rules."
     echo ""
     read -p "Are you sure? (y/N): " confirm
     
@@ -3867,12 +3888,12 @@ remove_connection_protection() {
     
     local rules_removed=0
     
-    # Find and remove all ERISRTG-related rules
-    # Method 1: Remove rules based on port ranges (common erisrtg ports)
+    # Find and remove all packet-related rules
+    # Method 1: Remove rules based on port ranges (common packet ports)
     for table in raw mangle; do
         # Get all rules in the table
         while IFS= read -r rule; do
-            if [[ "$rule" == *"erisrtg"* ]] || [[ "$rule" == *"NOTRACK"* ]] || [[ "$rule" == *"RST"* ]]; then
+            if [[ "$rule" == *"packet"* ]] || [[ "$rule" == *"NOTRACK"* ]] || [[ "$rule" == *"RST"* ]]; then
                 # This is a simplistic approach - better to track specific rules
                 iptables -t "$table" -F 2>/dev/null && ((rules_removed+=10))
                 break
@@ -3904,7 +3925,7 @@ remove_connection_protection() {
 set_global_mtu() {
     clear
     echo -e "\n${YELLOW}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${YELLOW}Set Global MTU for ALL ERISRTG Packet Tunnels${NC}"
+    echo -e "${YELLOW}Set Global MTU for ALL packet Tunnels${NC}"
     echo -e "${YELLOW}══════════════════════════════════════════════════════════════${NC}\n"
     
     echo -e "${CYAN}MTU Recommendations:${NC}"
@@ -4296,7 +4317,7 @@ run_mtu_test() {
                     print_success "MTU set to $recommended in $(basename "$target_config")"
 
                     local config_name=$(basename "$target_config" .yaml)
-                    local service_name="erisrtg-${config_name}.service"
+                    local service_name="packet-${config_name}.service"
                     
                     if systemctl list-unit-files 2>/dev/null | grep -q "$service_name"; then
                         echo ""
@@ -4331,14 +4352,14 @@ run_mtu_test() {
 # Helper function to restart all services
 restart_all_services() {
     local services=("$@")
-    echo -e "\n${YELLOW}Restarting all ERISRTG services...${NC}"
+    echo -e "\n${YELLOW}Restarting all packet services...${NC}"
     
     local success_count=0
     local fail_count=0
     
     for svc in "${services[@]}"; do
         local service_name="${svc%.service}"
-        local display_name="${service_name#erisrtg-}"
+        local display_name="${service_name#packet-}"
         
         echo -n " Restarting $display_name... "
         
@@ -4365,9 +4386,9 @@ restart_all_services() {
 # Helper function for live logs
 live_log_all_services() {
     local services=("$@")
-    echo -e "\n${YELLOW}Live Log Monitoring - All ERISRTG Packet Tunnels${NC}"
+    echo -e "\n${YELLOW}Live Log Monitoring - All packet Tunnels${NC}"
     echo -e "────────────────────────────────────────────────────────────────"
-    echo -e "${CYAN}Showing logs from all erisrtg services (Ctrl+C to exit)${NC}\n"
+    echo -e "${CYAN}Showing logs from all packet services (Ctrl+C to exit)${NC}\n"
     sleep 2
     
     local journal_args=""
@@ -4385,13 +4406,13 @@ delete_all_tunnels() {
     local services=("$@")
     echo -e "\n${RED}╔══════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${RED}║                          WARNING!                            ║${NC}"
-    echo -e "${RED}║    This will delete ALL ERISRTG tunnels and configurations!    ║${NC}"
+    echo -e "${RED}║    This will delete ALL packet tunnels and configurations!    ║${NC}"
     echo -e "${RED}╚══════════════════════════════════════════════════════════════╝${NC}\n"
     
     echo -e "${YELLOW}Services to be deleted:${NC}"
     for svc in "${services[@]}"; do
         local service_name="${svc%.service}"
-        local display_name="${service_name#erisrtg-}"
+        local display_name="${service_name#packet-}"
         echo -e " - ${CYAN}$display_name${NC}"
     done
     
@@ -4411,7 +4432,7 @@ delete_all_tunnels() {
     
     for svc in "${services[@]}"; do
         local service_name="${svc%.service}"
-        local display_name="${service_name#erisrtg-}"
+        local display_name="${service_name#packet-}"
         local config_file="$CONFIG_DIR/$display_name.yaml"
         
         echo -n " Removing $display_name... "
@@ -4708,12 +4729,12 @@ save_iptables() {
 # UNINSTALL & UTILITY FUNCTIONS
 # ================================================
 
-# Uninstall ERISRTG
-uninstall_erisrtg() {
+# Uninstall packet
+uninstall_packet() {
     clear
     show_banner
     echo -e "${RED}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${RED}║ Uninstall ERISRTG                                          ║${NC}"
+    echo -e "${RED}║ Uninstall packet                                          ║${NC}"
     echo -e "${RED}╚══════════════════════════════════════════════════════════╝${NC}\n"
     
     read -p "Are you sure? (y/N): " confirm
@@ -4725,7 +4746,7 @@ uninstall_erisrtg() {
     
     local services=()
     mapfile -t services < <(systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null |
-                          grep -E '^erisrtg-.*\.service' | awk '{print $1}' || true)
+                          grep -E '^packet-.*\.service' | awk '{print $1}' || true)
     
     for service in "${services[@]}"; do
         systemctl stop "$service" 2>/dev/null || true
@@ -4741,7 +4762,7 @@ uninstall_erisrtg() {
     systemctl daemon-reload
     
     print_step "Removing files..."
-    rm -f "$BIN_DIR/erisrtg" 2>/dev/null || true
+    rm -f "$BIN_DIR/packet" 2>/dev/null || true
     
     read -p "Remove configuration files? (y/N): " remove_configs
     if [[ "$remove_configs" =~ ^[Yy]$ ]]; then
@@ -4752,7 +4773,7 @@ uninstall_erisrtg() {
         print_info "Configuration preserved in $CONFIG_DIR/"
     fi
     
-    print_success "✅ ERISRTG uninstalled"
+    print_success "✅ packet uninstalled"
     pause
     return
 }
@@ -4760,11 +4781,11 @@ uninstall_erisrtg() {
 # TELEGRAM BOT CONFIGURATION
 # ================================================
 
-readonly BOT_CONFIG_DIR="/etc/telegram-erisrtg-bot"
+readonly BOT_CONFIG_DIR="/etc/telegram-packet-bot"
 readonly BOT_CONFIG_FILE="$BOT_CONFIG_DIR/config.conf"
-readonly BOT_LOG_FILE="/var/log/telegram-erisrtg-bot.log"
-readonly BOT_SERVICE="telegram-erisrtg-bot"
-readonly BOT_SCRIPT="/usr/local/bin/telegram-erisrtg-bot"
+readonly BOT_LOG_FILE="/var/log/telegram-packet-bot.log"
+readonly BOT_SERVICE="telegram-packet-bot"
+readonly BOT_SCRIPT="/usr/local/bin/telegram-packet-bot"
 
 # ================================================
 # BOT CORE FUNCTIONS
@@ -4804,7 +4825,7 @@ init_bot_config() {
     mkdir -p "$BOT_CONFIG_DIR"
     if [ ! -f "$BOT_CONFIG_FILE" ]; then
         cat > "$BOT_CONFIG_FILE" << EOF
-# ERISRTG Telegram Bot Configuration
+# packet Telegram Bot Configuration
 # Last updated: $(date)
 BOT_TOKEN=""
 CHAT_ID=""
@@ -4839,7 +4860,7 @@ load_bot_config() {
 # Save bot configuration
 save_bot_config() {
     cat > "$BOT_CONFIG_FILE" << EOF
-# ERISRTG Telegram Bot Configuration
+# packet Telegram Bot Configuration
 # Last updated: $(date)
 BOT_TOKEN="$BOT_TOKEN"
 CHAT_ID="$CHAT_ID"
@@ -4860,7 +4881,7 @@ EOF
 detect_socks5_proxy() {
     local socks5_found=""
     local socks5_port=""
-    echo "Checking ERISRTG client configs for SOCKS5 proxy..." >> "$BOT_LOG_FILE"
+    echo "Checking packet client configs for SOCKS5 proxy..." >> "$BOT_LOG_FILE"
     
     # Find all client configs
     while IFS= read -r -d '' file; do
@@ -4927,8 +4948,8 @@ socks5:\
             echo "SOCKS5 proxy added to $first_client on port 1080" >> "$BOT_LOG_FILE"
             
             # Restart the client service
-            systemctl restart "erisrtg-$first_client" 2>/dev/null
-            echo "Service erisrtg-$first_client restarted" >> "$BOT_LOG_FILE"
+            systemctl restart "packet-$first_client" 2>/dev/null
+            echo "Service packet-$first_client restarted" >> "$BOT_LOG_FILE"
             
             result="127.0.0.1:1080"
         fi
@@ -4966,17 +4987,17 @@ send_telegram_message() {
     fi
     
     # ============================================
-    # METHOD 2: Through erisrtg.workers.dev (Proxy)
+    # METHOD 2: Through behzad.workers.dev (Proxy)
     # ============================================
     if [ $success -ne 0 ]; then
         response=$(curl -s --max-time 8 \
-            -X POST "https://telegram.erisrtg.workers.dev/bot$BOT_TOKEN/sendMessage" \
+            -X POST "https://telegram.behzad.workers.dev/bot$BOT_TOKEN/sendMessage" \
             -H "Content-Type: application/json" \
             -d "$(printf '{"chat_id":"%s","text":"%s","parse_mode":"%s"}' "$CHAT_ID" "$message" "$parse_mode")" 2>&1)
         
         if echo "$response" | grep -q '"ok":true'; then
             success=0
-            echo "[$(date)] Message sent via erisrtg.workers.dev" >> "$BOT_LOG_FILE"
+            echo "[$(date)] Message sent via behzad.workers.dev" >> "$BOT_LOG_FILE"
         fi
     fi
     
@@ -5000,7 +5021,7 @@ send_telegram_message() {
     # ============================================
     if [ $success -ne 0 ]; then
         response=$(curl -s --max-time 8 \
-            -X POST "https://telegram.erisrtg.workers.dev/bot$BOT_TOKEN/sendMessage" \
+            -X POST "https://telegram.behzad.workers.dev/bot$BOT_TOKEN/sendMessage" \
             --data-urlencode "chat_id=$CHAT_ID" \
             --data-urlencode "text=$message" \
             --data-urlencode "parse_mode=$parse_mode" 2>&1)
@@ -5031,12 +5052,12 @@ create_bot_script() {
     cat > "$BOT_SCRIPT" << 'EOF'
 #!/bin/bash
 
-# ERISRTG Telegram Bot - Monitor Service
-# Auto-generated by ERISRTG Manager
+# packet Telegram Bot - Monitor Service
+# Auto-generated by packet Manager
 
-BOT_CONFIG="/etc/telegram-erisrtg-bot/config.conf"
-LOG_FILE="/var/log/telegram-erisrtg-bot.log"
-LAST_STATE_FILE="/etc/telegram-erisrtg-bot/last_state"
+BOT_CONFIG="/etc/telegram-packet-bot/config.conf"
+LOG_FILE="/var/log/telegram-packet-bot.log"
+LAST_STATE_FILE="/etc/telegram-packet-bot/last_state"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
@@ -5072,16 +5093,16 @@ send_alert() {
             fi
         fi
         
-        # METHOD 2: Through erisrtg.workers.dev (JSON)
+        # METHOD 2: Through behzad.workers.dev (JSON)
         if [ $success -ne 0 ]; then
             response=$(curl -s --max-time 8 \
-                -X POST "https://telegram.erisrtg.workers.dev/bot$BOT_TOKEN/sendMessage" \
+                -X POST "https://telegram.behzad.workers.dev/bot$BOT_TOKEN/sendMessage" \
                 -H "Content-Type: application/json" \
                 -d "$(printf '{"chat_id":"%s","text":"%s","parse_mode":"HTML"}' "$CHAT_ID" "$message")" 2>&1)
             
             if echo "$response" | grep -q '"ok":true'; then
                 success=0
-                log "Alert sent via erisrtg.workers.dev (JSON)"
+                log "Alert sent via behzad.workers.dev (JSON)"
             fi
         fi
         
@@ -5101,7 +5122,7 @@ send_alert() {
         # METHOD 4: Through workers.dev with URL-encoded
         if [ $success -ne 0 ]; then
             response=$(curl -s --max-time 8 \
-                -X POST "https://telegram.erisrtg.workers.dev/bot$BOT_TOKEN/sendMessage" \
+                -X POST "https://telegram.behzad.workers.dev/bot$BOT_TOKEN/sendMessage" \
                 --data-urlencode "chat_id=$CHAT_ID" \
                 --data-urlencode "text=$message" \
                 --data-urlencode "parse_mode=HTML" 2>&1)
@@ -5128,7 +5149,7 @@ check_services() {
         [ -z "$svc" ] && continue
         local status=$(systemctl is-active "$svc" 2>/dev/null)
         local service_name="${svc%.service}"
-        local config_name="${service_name#erisrtg-}"
+        local config_name="${service_name#packet-}"
         
         current_state="$current_state${svc}:${status}\n"
         
@@ -5148,12 +5169,12 @@ check_services() {
             
             changes="$changes$message\n\n"
         fi
-    done < <(systemctl list-units --type=service --all --no-legend 2>/dev/null | grep "erisrtg-" | awk '{print $1}' || true)
+    done < <(systemctl list-units --type=service --all --no-legend 2>/dev/null | grep "packet-" | awk '{print $1}' || true)
     
     echo -e "$current_state" > "$LAST_STATE_FILE"
     
     if [ -n "$changes" ]; then
-        send_alert "🔔 <b>ERISRTG Service Status Changes</b>\n\n$changes"
+        send_alert "🔔 <b>packet Service Status Changes</b>\n\n$changes"
     fi
 }
 
@@ -5161,11 +5182,11 @@ send_boot_report() {
     local report="🚀 <b>Server Boot Report - $(hostname)</b>\n\n"
     report+="⏰ <b>Time:</b> $(date '+%Y-%m-%d %H:%M:%S')\n\n"
     
-    report+="🔧 <b>ERISRTG Services:</b>\n"
+    report+="🔧 <b>packet Services:</b>\n"
     local services=()
     while IFS= read -r svc; do
         services+=("$svc")
-    done < <(systemctl list-units --type=service --all --no-legend 2>/dev/null | grep "erisrtg-" | awk '{print $1}' || true)
+    done < <(systemctl list-units --type=service --all --no-legend 2>/dev/null | grep "packet-" | awk '{print $1}' || true)
     
     if [ ${#services[@]} -gt 0 ]; then
         for svc in "${services[@]}"; do
@@ -5180,7 +5201,7 @@ send_boot_report() {
             report+="  $emoji $svc: $status\n"
         done
     else
-        report+="  No ERISRTG services found\n"
+        report+="  No packet services found\n"
     fi
     
     # Add SOCKS5 status if configured
@@ -5222,7 +5243,7 @@ EOF
 create_bot_service() {
     cat > "/etc/systemd/system/$BOT_SERVICE.service" << EOF
 [Unit]
-Description=ERISRTG Telegram Bot Monitor
+Description=packet Telegram Bot Monitor
 After=network.target
 Wants=network.target
 
@@ -5251,7 +5272,7 @@ remove_bot() {
     
     print_warning "This will completely remove the Telegram bot and all its files."
     echo -e "${GREEN}Note: This only removes the Telegram bot files.${NC}"
-    echo -e "${GREEN}Your ERISRTG tunnels and services will NOT be affected.${NC}"
+    echo -e "${GREEN}Your packet tunnels and services will NOT be affected.${NC}"
     echo ""
     read_confirm "Are you ABSOLUTELY SURE?" confirm_remove "n"
     
@@ -5304,4 +5325,422 @@ setup_bot_wizard() {
     # 1. Get Bot Token
     print_input "Step 1: Enter your Bot Token"
     echo -e "${CYAN}How to get:${NC}"
-    echo "  1. Open Telegram and search for @BotFathe
+    echo "  1. Open Telegram and search for @BotFather"
+    echo "  2. Send /newbot and follow instructions"
+    echo "  3. Copy the token (looks like: 123456789:ABCdefGHIjklMNOpqrsTUVwxyz)"
+    echo ""
+    
+    local token=""
+    while [ -z "$token" ]; do
+        read -p "Bot Token > " token
+        token=$(echo "$token" | tr -d '[:space:]')
+        if [ -z "$token" ]; then
+            print_error "Token cannot be empty"
+        fi
+    done
+    BOT_TOKEN="$token"
+    print_success "Bot token saved"
+    echo ""
+    
+    # 2. Get Chat ID
+    print_input "Step 2: Enter your Telegram Chat ID"
+    echo -e "${CYAN}How to get:${NC}"
+    echo "  1. Open Telegram and search for @userinfobot"
+    echo "  2. Send /start"
+    echo "  3. Your ID will be shown (usually a number)"
+    echo ""
+    
+    local chat_id=""
+    while [ -z "$chat_id" ]; do
+        read -p "Chat ID > " chat_id
+        chat_id=$(echo "$chat_id" | tr -d '[:space:]')
+        if [ -z "$chat_id" ]; then
+            print_error "Chat ID cannot be empty"
+        fi
+    done
+    CHAT_ID="$chat_id"
+    print_success "Chat ID saved"
+    echo ""
+    
+    # 3. Detect or configure SOCKS5 proxy
+    print_input "Step 3: Configuring SOCKS5 proxy for Telegram"
+    echo -e "${CYAN}Checking existing client configs for SOCKS5...${NC}"
+    
+    # Try to detect existing SOCKS5
+    local detected_proxy=$(detect_socks5_proxy)
+    
+    if [ -n "$detected_proxy" ]; then
+        SOCKS5_PROXY="$detected_proxy"
+        print_success "Found existing SOCKS5 proxy: $SOCKS5_PROXY"
+        USE_SOCKS5="true"
+    else
+        print_warning "No SOCKS5 proxy found in client configs"
+        read_confirm "Add SOCKS5 proxy to first client? (recommended)" add_socks5 "y"
+        
+        if [ "$add_socks5" = "true" ]; then
+            local added_proxy=$(add_socks5_to_client)
+            if [ -n "$added_proxy" ]; then
+                SOCKS5_PROXY="$added_proxy"
+                print_success "SOCKS5 proxy added: $SOCKS5_PROXY"
+                USE_SOCKS5="true"
+            else
+                print_error "Failed to add SOCKS5 proxy"
+                USE_SOCKS5="false"
+                SOCKS5_PROXY=""
+            fi
+        else
+            print_info "Continuing without SOCKS5 proxy"
+            USE_SOCKS5="false"
+            SOCKS5_PROXY=""
+        fi
+    fi
+    echo ""
+    
+    # 4. Ask for notification preferences
+    print_input "Step 4: Configure notification settings"
+    read_confirm "Enable boot reports? (recommended)" ENABLE_BOOT_REPORT "y"
+    read_confirm "Enable service status monitoring?" ENABLE_SERVICE_WATCH "y"
+    echo ""
+    
+    # 5. Ask for watch interval
+    print_input "Step 5: Set check interval"
+    echo -e "${CYAN}How often should the bot check for changes? (30-3600 seconds)${NC}"
+    read -p "Interval [60]: " interval
+    interval="${interval:-60}"
+    if [[ "$interval" =~ ^[0-9]+$ ]] && [ "$interval" -ge 30 ] && [ "$interval" -le 3600 ]; then
+        WATCH_INTERVAL="$interval"
+    else
+        print_warning "Invalid interval, using default: 60 seconds"
+        WATCH_INTERVAL="60"
+    fi
+    echo ""
+    
+    # 6. Enable bot and save
+    ENABLE_BOT="true"
+    save_bot_config
+    
+    # 7. Create bot files
+    print_step "Creating bot files..."
+    create_bot_script
+    create_bot_service
+    
+    # 8. Start bot service
+    print_step "Starting bot service..."
+    systemctl enable $BOT_SERVICE >/dev/null 2>&1
+    systemctl start $BOT_SERVICE
+    sleep 2
+    
+    # 9. Check status and send test message
+    if systemctl is-active --quiet $BOT_SERVICE; then
+        print_success "✅ Bot service started successfully!"
+        
+        print_step "Sending test message..."
+        local test_message="✅ <b>packet Bot Successfully Installed!</b>\n\n"
+        test_message="${test_message}Bot is now active and monitoring your server.\n"
+        test_message="${test_message}📋 You will receive:\n"
+        test_message="${test_message}• Boot reports when server restarts\n"
+        test_message="${test_message}• Service status changes\n"
+        test_message="${test_message}• Packet loss alerts\n\n"
+        test_message="${test_message}⚙️ Settings:\n"
+        test_message="${test_message}• Watch interval: ${WATCH_INTERVAL}s\n"
+        test_message="${test_message}• Boot reports: ${ENABLE_BOOT_REPORT}\n"
+        test_message="${test_message}• Service watch: ${ENABLE_SERVICE_WATCH}\n"
+        
+        if [ -n "$SOCKS5_PROXY" ]; then
+            test_message="${test_message}• SOCKS5 proxy: ${SOCKS5_PROXY} (enabled)\n"
+        fi
+        
+        test_message="${test_message}\n🚀 Happy tunneling!"
+        
+        if send_telegram_message "$test_message"; then
+            print_success "Test message sent! Check your Telegram"
+        else
+            print_warning "Test message may have failed. Check your token and chat ID"
+            sleep 2
+            print_info "If you received the message in Telegram, it's working fine"
+        fi
+    else
+        print_error "❌ Bot service failed to start"
+        journalctl -u $BOT_SERVICE -n 20 --no-pager
+    fi
+    
+    echo ""
+    print_success "✅ Bot setup completed!"
+    pause
+}
+
+# ================================================
+# BOT MANAGEMENT MENU
+# ================================================
+
+telegram_bot_menu() {
+    init_bot_config
+    load_bot_config
+    
+    while true; do
+        clear
+        # show_banner
+        echo -e "${GREEN}╔══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${GREEN}║              🤖 Telegram Bot Management                      ║${NC}"
+        echo -e "${GREEN}╚══════════════════════════════════════════════════════════════╝${NC}\n"
+        
+        # Status Overview
+        echo -e "${YELLOW}╔══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${YELLOW}║                      STATUS OVERVIEW                         ║${NC}"
+        echo -e "${YELLOW}╚══════════════════════════════════════════════════════════════╝${NC}"
+        
+        # Bot Status
+        if [ "$ENABLE_BOT" = "true" ]; then
+            echo -e "  ${GREEN}●${NC} Bot: ${GREEN}ENABLED${NC}"
+        else
+            echo -e "  ${RED}○${NC} Bot: ${RED}DISABLED${NC}"
+        fi
+        
+        # Configuration Status
+        if [ -n "$BOT_TOKEN" ] && [ -n "$CHAT_ID" ]; then
+            echo -e "  ${GREEN}✓${NC} Configuration: ${GREEN}Complete${NC}"
+            echo -e "  ${CYAN}  Token: ${BOT_TOKEN:0:15}...${NC}"
+            echo -e "  ${CYAN}  Chat ID: $CHAT_ID${NC}"
+        else
+            echo -e "  ${RED}✗${NC} Configuration: ${RED}Incomplete${NC}"
+        fi
+        
+        # Service Status
+        if systemctl is-active --quiet $BOT_SERVICE 2>/dev/null; then
+            echo -e "  ${GREEN}✓${NC} Service: ${GREEN}Running${NC}"
+            local uptime=$(systemctl show $BOT_SERVICE -p ActiveEnterTimestamp 2>/dev/null | cut -d= -f2)
+            [ -n "$uptime" ] && echo -e "  ${CYAN}  Started: $uptime${NC}"
+        else
+            echo -e "  ${RED}✗${NC} Service: ${RED}Stopped${NC}"
+        fi
+        
+        # SOCKS5 Status
+        if [ -n "$SOCKS5_PROXY" ] && [ "$USE_SOCKS5" = "true" ]; then
+            echo -e "  ${GREEN}✓${NC} SOCKS5 Proxy: ${CYAN}$SOCKS5_PROXY${NC}"
+        fi
+        
+        echo -e "\n${YELLOW}══════════════════════════════════════════════════════════════${NC}"
+        echo -e "${CYAN}MAIN ACTIONS:${NC}"
+        echo -e "  ${WHITE}[S]${NC} 🚀 ${GREEN}Setup Bot Wizard${NC} - Complete setup in one go"
+        echo -e "  ${WHITE}[R]${NC} 🗑️  ${RED}Remove Bot${NC} - Uninstall completely"
+        
+        echo -e "\n${YELLOW}══════════════════════════════════════════════════════════════${NC}"
+        echo -e "${CYAN}NOTIFICATION SETTINGS:${NC}"
+        echo -e "  ${WHITE}[1]${NC} Boot Report [$( [ "$ENABLE_BOOT_REPORT" = "true" ] && echo "✅ ON" || echo "❌ OFF")]"
+        echo -e "  ${WHITE}[2]${NC} Service Watch [$( [ "$ENABLE_SERVICE_WATCH" = "true" ] && echo "✅ ON" || echo "❌ OFF")]"
+        echo -e "  ${WHITE}[3]${NC} Watch Interval (current: ${CYAN}${WATCH_INTERVAL}s${NC})"
+        
+        echo -e "\n${YELLOW}══════════════════════════════════════════════════════════════${NC}"
+        echo -e "${CYAN}PROXY SETTINGS:${NC}"
+        echo -e "  ${WHITE}[4]${NC} Toggle SOCKS5 Proxy [$( [ "$USE_SOCKS5" = "true" ] && echo "✅ ON" || echo "❌ OFF")]"
+        echo -e "  ${WHITE}[5]${NC} Set SOCKS5 Proxy (current: ${CYAN}${SOCKS5_PROXY:-Not set}${NC})"
+        
+        echo -e "\n${YELLOW}══════════════════════════════════════════════════════════════${NC}"
+        echo -e "${CYAN}SERVICE CONTROL:${NC}"
+        echo -e "  ${WHITE}[6]${NC} Start Bot Service"
+        echo -e "  ${WHITE}[7]${NC} Stop Bot Service"
+        echo -e "  ${WHITE}[8]${NC} Restart Bot Service"
+        echo -e "  ${WHITE}[9]${NC} View Bot Logs"
+        echo -e "  ${WHITE}[10]${NC} Test Bot (Send test message)"
+        
+        echo -e "\n${YELLOW}══════════════════════════════════════════════════════════════${NC}"
+        echo -e "  ${WHITE}[0]${NC} ↩️ Back to Main Menu"
+        echo ""
+        
+        read -p "Choose option: " bot_choice
+        
+        case $bot_choice in
+            [Ss]) setup_bot_wizard ;;
+            [Rr]) remove_bot ;;
+            
+            1)
+                [ "$ENABLE_BOOT_REPORT" = "true" ] && ENABLE_BOOT_REPORT="false" || ENABLE_BOOT_REPORT="true"
+                save_bot_config
+                print_success "Boot Report: $([ "$ENABLE_BOOT_REPORT" = "true" ] && echo "ON" || echo "OFF")"
+                sleep 1
+                ;;
+            2)
+                [ "$ENABLE_SERVICE_WATCH" = "true" ] && ENABLE_SERVICE_WATCH="false" || ENABLE_SERVICE_WATCH="true"
+                save_bot_config
+                print_success "Service Watch: $([ "$ENABLE_SERVICE_WATCH" = "true" ] && echo "ON" || echo "OFF")"
+                sleep 1
+                ;;
+            3)
+                echo -e "\n${YELLOW}Enter watch interval in seconds (30-3600):${NC}"
+                read -p "> " new_interval
+                if [[ "$new_interval" =~ ^[0-9]+$ ]] && [ "$new_interval" -ge 30 ] && [ "$new_interval" -le 3600 ]; then
+                    WATCH_INTERVAL="$new_interval"
+                    save_bot_config
+                    print_success "Watch interval set to ${WATCH_INTERVAL}s"
+                    
+                    if systemctl is-active --quiet $BOT_SERVICE; then
+                        systemctl restart $BOT_SERVICE
+                        print_info "Bot service restarted to apply new interval"
+                    fi
+                else
+                    print_error "Invalid interval (must be 30-3600)"
+                    sleep 2
+                fi
+                ;;
+            4)
+                if [ -n "$SOCKS5_PROXY" ]; then
+                    [ "$USE_SOCKS5" = "true" ] && USE_SOCKS5="false" || USE_SOCKS5="true"
+                    save_bot_config
+                    print_success "SOCKS5 Proxy: $([ "$USE_SOCKS5" = "true" ] && echo "ON" || echo "OFF")"
+                    sleep 1
+                else
+                    print_error "Please set SOCKS5 proxy first (option 5)"
+                    sleep 2
+                fi
+                ;;
+            5)
+                echo -e "\n${YELLOW}Enter SOCKS5 proxy (host:port):${NC}"
+                read -p "> " new_proxy
+                if [ -n "$new_proxy" ]; then
+                    SOCKS5_PROXY="$new_proxy"
+                    USE_SOCKS5="true"
+                    save_bot_config
+                    print_success "SOCKS5 proxy set to $SOCKS5_PROXY"
+                    sleep 1
+                fi
+                ;;
+            6)
+                if [ ! -f "$BOT_SCRIPT" ]; then
+                    create_bot_script
+                fi
+                if [ ! -f "/etc/systemd/system/$BOT_SERVICE.service" ]; then
+                    create_bot_service
+                fi
+                systemctl start $BOT_SERVICE
+                sleep 2
+                if systemctl is-active --quiet $BOT_SERVICE; then
+                    print_success "Bot service started"
+                else
+                    print_error "Failed to start bot service"
+                    journalctl -u $BOT_SERVICE -n 10 --no-pager
+                fi
+                sleep 1
+                ;;
+            7)
+                systemctl stop $BOT_SERVICE
+                print_info "Bot service stopped"
+                sleep 1
+                ;;
+            8)
+                systemctl restart $BOT_SERVICE
+                sleep 2
+                if systemctl is-active --quiet $BOT_SERVICE; then
+                    print_success "Bot service restarted"
+                else
+                    print_error "Failed to restart bot service"
+                fi
+                sleep 1
+                ;;
+            9)
+                echo -e "\n${CYAN}Last 20 lines of bot log:${NC}\n"
+                if [ -f "$BOT_LOG_FILE" ]; then
+                    tail -20 "$BOT_LOG_FILE"
+                else
+                    journalctl -u $BOT_SERVICE -n 20 --no-pager
+                fi
+                echo ""
+                pause
+                ;;
+            10)
+                if [ -n "$BOT_TOKEN" ] && [ -n "$CHAT_ID" ] && [ "$ENABLE_BOT" = "true" ]; then
+                    print_step "Sending test message..."
+                    local test_msg="✅ <b>packet Bot Test</b>\n\n"
+                    test_msg+="If you see this, bot is working correctly!\n"
+                    test_msg+="Time: $(date '+%Y-%m-%d %H:%M:%S')"
+                    
+                    if send_telegram_message "$test_msg"; then
+                        print_success "Test message sent! Check your Telegram"
+                    else
+                        print_error "Failed to send message. Check token and chat ID."
+                    fi
+                else
+                    print_error "Bot not properly configured or enabled"
+                    print_info "Please run Setup Wizard [S] first"
+                fi
+                pause
+                ;;
+            0) return ;;
+            *) print_error "Invalid choice"; sleep 1 ;;
+        esac
+    done
+}
+# ================================================
+# MAIN MENU
+# ================================================
+
+main_menu() {
+    while true; do
+        clear
+        show_banner
+        
+        echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${GREEN}║ Main Menu                                                ║${NC}"
+        echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${NC}\n"
+        
+        if [ -f "$BIN_DIR/packet" ]; then
+            echo -e "${GREEN}✅ packet is installed${NC}"
+            local core_version
+            core_version=$("$BIN_DIR/packet" version 2>/dev/null | grep "^Version:" | head -1 | cut -d':' -f2 | xargs)
+            if [ -n "$core_version" ]; then
+                echo -e "   ${GREEN}└─ Version: ${CYAN}$core_version${NC}"
+            fi
+        else
+            echo -e "${YELLOW}⚠️ packet not installed${NC}"
+        fi
+        
+        local missing_deps
+        missing_deps=$(check_dependencies)
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✅ Dependencies are installed${NC}"
+        else
+            echo -e "${YELLOW}⚠️ Missing dependencies: $missing_deps${NC}"
+        fi
+        
+        echo -e "\n${CYAN}0.${NC}⚙️  Install packet Binary / Manager"
+        echo -e "${CYAN}1.${NC}📦 Install Dependencies"
+        echo -e "${CYAN}2.${NC}🌍 Configure as Server (kharej)"
+        echo -e "${CYAN}3.${NC}🇮🇷 Configure as Client (Iran) [Port Forwarding / SOCKS5]"
+        echo -e "${CYAN}4.${NC}🛠️  Manage Services"
+        echo -e "${CYAN}5.${NC}🔄 Manage All Services (Restart/Logs/Delete)"
+        echo -e "${CYAN}6.${NC}📊 Test Connection"
+        echo -e "${CYAN}7.${NC}🚀 Optimize Server"
+        echo -e "${CYAN}8.${NC}🗑️  Uninstall packet"
+        echo -e "${CYAN}9.${NC}🤖 Telegram Bot Manager"
+        echo -e "${CYAN}10.${NC}🚪 Exit"
+        echo ""
+        
+        read -p "Select option [0-10]: " choice
+        
+        case $choice in
+            0) install_packet ;;
+            1) install_dependencies ;;
+            2) configure_server ;;
+            3) configure_client ;;
+            4) manage_services ;;
+            5) manage_all_services ;;
+            6) test_connection ;;
+            7) optimize_server ;;
+            8) uninstall_packet ;;
+            9) telegram_bot_menu ;;
+            10)
+                echo -e "\n${GREEN}══════════════════════════════════════════════════════════════${NC}"
+                echo -e "${GREEN} Goodbye! ${NC}"
+                echo -e "${GREEN}══════════════════════════════════════════════════════════════${NC}\n"
+                exit 0
+                ;;
+            *) print_error "Invalid option"; sleep 1 ;;
+        esac
+    done
+}
+
+# ================================================
+# START
+# ================================================
+
+check_root
+main_menu
